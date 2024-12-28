@@ -19,7 +19,11 @@ app.use(express.json())
 app.use(cors())
 
 // db connection
-connectDB();
+let dbConnection = null;
+const initDB = async () => {
+    dbConnection = await connectDB();
+};
+initDB();
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
@@ -28,7 +32,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use("/api/note", noteRouter)
 
 app.get("/", (req,res)=> {
-    res.send("API Working")
+    res.json({
+        message: "Hello Vercel - API is Working!",
+        status: "online",
+        dbStatus: dbConnection ? "connected" : "disconnected",
+        timestamp: new Date().toISOString()
+    });
 })
 
 app.listen(port,()=>{

@@ -1,14 +1,20 @@
 import mongoose from "mongoose";
+import 'dotenv/config';
 
-export const connectDB = async () => {
+const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb+srv://patelkaran16102003:mZSvCCKB9tknhgns@cluster0.bsspw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
-        console.log("Successfully connected to MongoDB Atlas");
+        if (!process.env.MONGODB_URI) {
+            throw new Error('MONGODB_URI is not defined in environment variables');
+        }
+
+        const conn = await mongoose.connect(process.env.MONGODB_URI);
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        return conn;
     } catch (error) {
-        console.error("MongoDB connection error:", error);
-        process.exit(1);
+        console.error("MongoDB connection error:", error.message);
+        // Don't exit the process, let the application handle the error
+        return null;
     }
-}
+};
+
+export { connectDB };

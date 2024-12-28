@@ -181,35 +181,46 @@ const App = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {notes && Array.isArray(notes) && notes.map((note) => (
-            <div key={note._id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-all">
-              <h2 className="text-xl font-bold mb-3 text-gray-800">{note.title}</h2>
-              <p className="text-gray-600 mb-4 break-words">{note.content}</p>
+            <div
+              key={note._id}
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-all mb-6"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-semibold text-gray-800">{note.title}</h3>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(note)}
+                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(note._id)}
+                    className="text-red-600 hover:text-red-800 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-gray-600 mb-4 whitespace-pre-wrap">{note.content}</p>
+
               {note.image && (
                 <div className="mb-4 relative rounded-lg overflow-hidden">
                   <img
-                    src={`https://backend-flame-two.vercel.app/uploads/${note.image}`}
+                    src={note.image}
                     alt={note.title}
                     className="w-full h-48 object-cover rounded-lg"
                     onError={(e) => {
-                      console.error('Image failed to load:', note.image);
-                      e.target.style.display = 'none';
+                      e.target.onerror = null;
+                      e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
                     }}
                   />
                 </div>
               )}
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => handleEdit(note)}
-                  className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(note._id)}
-                  className="flex-1 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                >
-                  Delete
-                </button>
+
+              <div className="text-sm text-gray-500">
+                {new Date(note.createdAt).toLocaleString()}
               </div>
             </div>
           ))}

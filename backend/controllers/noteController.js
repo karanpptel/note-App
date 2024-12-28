@@ -4,18 +4,33 @@ import fs from 'fs'
 // add note item
 const addNote = async (req, res) => {
     try {
+        if (!req.body.title || !req.body.content) {
+            return res.status(400).json({
+                success: false,
+                message: "Title and content are required"
+            });
+        }
+
         const note = new noteModel({
             title: req.body.title,
             content: req.body.content,
             image: req.file ? req.file.filename : null,
-            createdAt: req.body.date,
+            createdAt: new Date()
         });
 
         await note.save();
-        res.status(200).json({ success: true, message: "Note Added" });
+        res.status(201).json({ 
+            success: true, 
+            message: "Note Added",
+            note: note
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Error adding note" });
+        console.error('Error adding note:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Error adding note",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 }
 
@@ -23,24 +38,20 @@ const addNote = async (req, res) => {
 //all note list
 const listNote = async (req, res) => {
     try {
-        const notes = await noteModel.find({});
-        res.json({ success: true, data: notes });
+        const notes = await noteModel.find({}).sort({ createdAt: -1 });
+        res.status(200).json({ 
+            success: true, 
+            data: notes 
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Error fetching notes" });
+        console.error('Error fetching notes:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Error fetching notes",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
-// const listNote = async (req, res) => {
-//     try {
-//       console.log("Fetching notes...");
-//       const notes = await noteModel.find({});
-//       console.log("Notes fetched:", notes);
-//       res.json({ success: true, data: notes });
-//     } catch (error) {
-//       console.error("Error fetching notes:", error);
-//       res.status(500).json({ success: false, message: "Error fetching notes" });
-//     }
-//   };
 
 
 // remove note item

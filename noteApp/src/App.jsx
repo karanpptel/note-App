@@ -58,32 +58,36 @@ const App = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    try {
-      const formData = new FormData();
-      formData.append('title', form.title);
-      formData.append('content', form.content);
-      if (form.image) {
-        formData.append('image', form.image);
-      }
+    const formData = new FormData();
+    formData.append('title', form.title);
+    formData.append('content', form.content);
+    if (form.image) {
+      formData.append('image', form.image);
+    }
 
+    try {
       const config = {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       };
 
+      let response;
       if (editNoteId) {
         formData.append('id', editNoteId);
-        await axios.post('https://backend-flame-two.vercel.app/api/note/update', formData, config);
+        response = await axios.post('https://backend-flame-two.vercel.app/api/note/update', formData, config);
       } else {
-        await axios.post('https://backend-flame-two.vercel.app/api/note/add', formData, config);
+        response = await axios.post('https://backend-flame-two.vercel.app/api/note/add', formData, config);
       }
-      
-      setForm({ title: '', content: '', image: null });
-      setPreviewUrl(null);
-      setEditNoteId(null);
-      fetchNotes();
+
+      if (response.data.success) {
+        setForm({ title: '', content: '', image: null });
+        setPreviewUrl(null);
+        setEditNoteId(null);
+        fetchNotes();
+      } else {
+        alert(response.data.message || 'Error saving note');
+      }
     } catch (error) {
       console.error('Error saving note:', error);
       alert(error.response?.data?.message || 'Error saving note. Please try again.');
@@ -110,6 +114,24 @@ const App = () => {
         setIsLoading(false);
       }
     }
+  };
+
+  const renderImage = (imageUrl) => {
+    if (!imageUrl) return null;
+    
+    return (
+      <div className="mb-4 relative rounded-lg overflow-hidden">
+        <img
+          src={imageUrl}
+          alt="Note"
+          className="w-full h-48 object-cover rounded-lg"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
+          }}
+        />
+      </div>
+    );
   };
 
   return (
@@ -152,15 +174,7 @@ const App = () => {
                 onChange={handleFileChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-              {previewUrl && (
-                <div className="mt-2 relative rounded-lg overflow-hidden">
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                </div>
-              )}
+              {previewUrl && renderImage(previewUrl)}
             </div>
 
             <button
@@ -204,20 +218,7 @@ const App = () => {
               </div>
 
               <p className="text-gray-600 mb-4 whitespace-pre-wrap">{note.content}</p>
-
-              {note.image && (
-                <div className="mb-4 relative rounded-lg overflow-hidden">
-                  <img
-                    src={note.image}
-                    alt={note.title}
-                    className="w-full h-48 object-cover rounded-lg"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
-                    }}
-                  />
-                </div>
-              )}
+              {renderImage(note.image)}
 
               <div className="text-sm text-gray-500">
                 {new Date(note.createdAt).toLocaleString()}

@@ -18,27 +18,24 @@ const __dirname = path.dirname(__filename);
 app.use(express.json())
 
 // CORS configuration
+app.use(cors({
+    origin: '*',  // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+    credentials: true,
+    maxAge: 86400
+}));
+
+// Additional headers for CORS
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://note-app-sn2b.vercel.app');
+    res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
-    // Handle preflight requests
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
     next();
 });
-
-// Apply CORS middleware after custom headers
-app.use(cors({
-    origin: 'https://note-app-sn2b.vercel.app',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    maxAge: 86400 // 24 hours
-}));
 
 // db connection
 let dbConnection = null;

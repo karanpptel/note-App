@@ -1,25 +1,21 @@
 import noteModel from "../models/noteModel.js";
 import fs from 'fs'
 
-
+// add note item
 const addNote = async (req, res) => {
-
-    let image_filename = `${req.file.filename}`;
-
-    const note = new noteModel({
-        title: req.body.title,
-        content: req.body.content,
-        image: image_filename,
-        createdAt: req.body.date,
-    })
-
     try {
-        await note.save();
-        res.status(200).json({ success: true, message: "Note Added" })
-    } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Error" })
+        const note = new noteModel({
+            title: req.body.title,
+            content: req.body.content,
+            image: req.file ? req.file.filename : null,
+            createdAt: req.body.date,
+        });
 
+        await note.save();
+        res.status(200).json({ success: true, message: "Note Added" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Error adding note" });
     }
 }
 

@@ -31,12 +31,26 @@ const App = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setForm({ ...form, image: file });
-    
     if (file) {
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        e.target.value = '';
+        return;
+      }
+      
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size should be less than 5MB');
+        e.target.value = '';
+        return;
+      }
+
+      setForm({ ...form, image: file });
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     } else {
+      setForm({ ...form, image: null });
       setPreviewUrl(null);
     }
   };
@@ -44,24 +58,35 @@ const App = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const formData = new FormData();
-    formData.append('title', form.title);
-    formData.append('content', form.content);
-    if (form.image) formData.append('image', form.image);
-
+    
     try {
+      const formData = new FormData();
+      formData.append('title', form.title);
+      formData.append('content', form.content);
+      if (form.image) {
+        formData.append('image', form.image);
+      }
+
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
       if (editNoteId) {
         formData.append('id', editNoteId);
-        await axios.post('https://backend-flame-two.vercel.app/api/note/update', formData);
+        await axios.post('https://backend-flame-two.vercel.app/api/note/update', formData, config);
       } else {
-        await axios.post('https://backend-flame-two.vercel.app/api/note/add', formData);
+        await axios.post('https://backend-flame-two.vercel.app/api/note/add', formData, config);
       }
+      
       setForm({ title: '', content: '', image: null });
       setPreviewUrl(null);
       setEditNoteId(null);
       fetchNotes();
     } catch (error) {
       console.error('Error saving note:', error);
+      alert(error.response?.data?.message || 'Error saving note. Please try again.');
     } finally {
       setIsLoading(false);
     }

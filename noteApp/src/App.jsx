@@ -15,7 +15,7 @@ const App = () => {
   const fetchNotes = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('http://localhost:4000/api/note/list');
+      const response = await axios.get('https://backend-flame-two.vercel.app/api/note/list');
       setNotes(response.data.data);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -52,9 +52,9 @@ const App = () => {
     try {
       if (editNoteId) {
         formData.append('id', editNoteId);
-        await axios.post('http://localhost:4000/api/note/update', formData);
+        await axios.post('https://backend-flame-two.vercel.app/api/note/update', formData);
       } else {
-        await axios.post('http://localhost:4000/api/note/add', formData);
+        await axios.post('https://backend-flame-two.vercel.app/api/note/add', formData);
       }
       setForm({ title: '', content: '', image: null });
       setPreviewUrl(null);
@@ -77,7 +77,7 @@ const App = () => {
     if (window.confirm('Are you sure you want to delete this note?')) {
       setIsLoading(true);
       try {
-        await axios.post('http://localhost:4000/api/note/remove', { id });
+        await axios.post('https://backend-flame-two.vercel.app/api/note/remove', { id });
         fetchNotes();
       } catch (error) {
         console.error('Error deleting note:', error);
@@ -162,7 +162,7 @@ const App = () => {
               {note.image && (
                 <div className="mb-4 relative rounded-lg overflow-hidden">
                   <img
-                    src={`http://localhost:4000/uploads/${note.image}`}
+                    src={`https://backend-flame-two.vercel.app/uploads/${note.image}`}
                     alt={note.title}
                     className="w-full h-48 object-cover rounded-lg"
                     onError={(e) => {
